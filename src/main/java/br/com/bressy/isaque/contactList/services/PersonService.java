@@ -1,7 +1,11 @@
 package br.com.bressy.isaque.contactList.services;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import br.com.bressy.isaque.contactList.entities.Person;
@@ -12,6 +16,11 @@ public class PersonService {
 	public Optional<Person> getPersonById(Long id) {
 		// TODO Auto-generated method stub
 		return Optional.of(new Person());
+	}
+
+	public Page<Person> getPeople(PageRequest pageRequest) {
+		// TODO Auto-generated method stub
+		return new PageImpl<Person>(new ArrayList<Person>());
 	}
 
 }
