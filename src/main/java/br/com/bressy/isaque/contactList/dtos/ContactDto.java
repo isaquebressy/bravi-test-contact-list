@@ -1,8 +1,10 @@
 package br.com.bressy.isaque.contactList.dtos;
 
+import br.com.bressy.isaque.contactList.enums.TypeEnum;
+
 public class ContactDto {
 	private String detail;
-	private int type;
+	private TypeEnum type;
 
 	public ContactDto() {
 	}
@@ -15,11 +17,11 @@ public class ContactDto {
 		this.detail = detail;
 	}
 
-	public int getType() {
+	public TypeEnum getType() {
 		return type;
 	}
 
-	public void setType(int type) {
+	public void setType(TypeEnum type) {
 		this.type = type;
 	}
 
