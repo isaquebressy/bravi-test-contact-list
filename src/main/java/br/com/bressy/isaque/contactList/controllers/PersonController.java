@@ -43,7 +43,7 @@ public class PersonController {
 	private int pageSize;
 
 	@GetMapping
-	ResponseEntity<Response<Page<PersonDto>>> getAllPeople(@RequestParam(value = "page", defaultValue = "0") int page) {
+	public ResponseEntity<Response<Page<PersonDto>>> getAllPeople(@RequestParam(value = "page", defaultValue = "0") int page) {
 
 		log.info("Buscando todas as pessoas");
 
@@ -59,7 +59,7 @@ public class PersonController {
 	}
 
 	@GetMapping("/{id}")
-	ResponseEntity<Response<PersonDto>> getPerson(@PathVariable Long id) {
+	public ResponseEntity<Response<PersonDto>> getPerson(@PathVariable Long id) {
 
 		log.info("Buscando pessoa por id {}", id);
 
@@ -80,7 +80,7 @@ public class PersonController {
 	@PostMapping
 	public ResponseEntity<Response<PersonDto>> create(@Valid @RequestBody PersonDto dto, BindingResult result) {
 
-		log.info("Cadastrando loja: {}", dto);
+		log.info("Cadastrando pessoa: {}", dto);
 
 		Response<PersonDto> response = new Response<>();
 		this.validateData(dto, result);
@@ -125,7 +125,6 @@ public class PersonController {
 
 		response.setData(this.convertToDto(newPerson));
 		return ResponseEntity.ok(response);
-
 	}
 
 	@DeleteMapping("/{id}")
@@ -148,7 +147,7 @@ public class PersonController {
 		return ResponseEntity.ok(response);
 	}
 
-	private void validateData(@Valid PersonDto dto, BindingResult result) {
+	private void validateData(PersonDto dto, BindingResult result) {
 		this.personService.findByName(dto.getName())
 				.ifPresent(person -> result.addError(new ObjectError("person", "Pessoa com nome já existente")));
 
