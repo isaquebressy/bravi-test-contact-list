@@ -23,4 +23,14 @@ public class PersonService {
 		return new PageImpl<Person>(new ArrayList<Person>());
 	}
 
+	public Optional<Person> findByName(String name) {
+		// TODO Auto-generated method stub
+		return Optional.of(new Person());
+	}
+
+	public Person persist(Person person) {
+		// TODO Auto-generated method stub
+		return new Person();
+	}
+
 }

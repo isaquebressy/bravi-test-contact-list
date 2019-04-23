@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,9 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.bressy.isaque.contactList.dtos.ContactDto;
 import br.com.bressy.isaque.contactList.dtos.PersonDto;
-import br.com.bressy.isaque.contactList.entities.Contact;
 import br.com.bressy.isaque.contactList.entities.Person;
 import br.com.bressy.isaque.contactList.response.Response;
 import br.com.bressy.isaque.contactList.services.PersonService;
@@ -55,32 +54,48 @@ public class PersonController {
 		Page<PersonDto> peopleDto = people.map(person -> this.convertToDto(person));
 
 		response.setData(peopleDto);
-		
+
 		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping("/{id}")
 	ResponseEntity<Response<PersonDto>> getPerson(@PathVariable Long id) {
-		
+
 		log.info("Buscando pessoa por id {}", id);
 
 		Response<PersonDto> response = new Response<>();
 		Optional<Person> person = this.personService.getPersonById(id);
-		
+
 		if (!person.isPresent()) {
 			log.error("Pessoa com id {} não encontrado", id);
 			response.getErrors().add("Pessoa com o id " + id + " não encontrada");
 			return ResponseEntity.badRequest().body(response);
 		}
-		
+
 		response.setData(this.convertToDto(person.get()));
-		
+
 		return ResponseEntity.ok(response);
 	}
 
 	@PostMapping
 	public ResponseEntity<Response<PersonDto>> create(@Valid @RequestBody PersonDto dto, BindingResult result) {
+
+		log.info("Cadastrando loja: {}", dto);
+
 		Response<PersonDto> response = new Response<>();
+		this.validateData(dto, result);
+
+		Person person = this.convertToEntity(dto);
+
+		if (result.hasErrors()) {
+			log.error("Erro validando dados da pessoa: {}", result.getAllErrors());
+			result.getAllErrors().forEach(error -> response.getErrors().add(error.getDefaultMessage()));
+			return ResponseEntity.badRequest().body(response);
+		}
+
+		this.personService.persist(person);
+		response.setData(this.convertToDto(person));
+
 		return ResponseEntity.ok(response);
 	}
 
@@ -98,11 +113,24 @@ public class PersonController {
 		return ResponseEntity.ok(response);
 	}
 
+	private void validateData(@Valid PersonDto dto, BindingResult result) {
+		this.personService.findByName(dto.getName())
+				.ifPresent(person -> result.addError(new ObjectError("person", "Pessoa com nome já existente")));
+
+	}
+
 	private PersonDto convertToDto(Person person) {
 		PersonDto dto = new PersonDto();
 		dto.setName(person.getName());
 
 		return dto;
+	}
+
+	private Person convertToEntity(PersonDto dto) {
+		Person person = new Person();
+		person.setName(dto.getName());
+
+		return person;
 	}
 
 }
