@@ -33,4 +33,9 @@ public class PersonService {
 		return new Person();
 	}
 
+	public void remove(Person person) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

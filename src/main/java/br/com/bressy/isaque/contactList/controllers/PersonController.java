@@ -102,14 +102,49 @@ public class PersonController {
 	@PutMapping("/{id}")
 	public ResponseEntity<Response<PersonDto>> update(@PathVariable Long id, @Valid @RequestBody PersonDto dto,
 			BindingResult result) {
+
+		log.info("Atualizando pessoa de id {}", id);
+
 		Response<PersonDto> response = new Response<>();
+		Optional<Person> person = this.personService.getPersonById(id);
+
+		if (!person.isPresent()) {
+			response.getErrors().add("Pessoa com o id " + id + " não encontrada");
+		}
+
+		Person newPerson = this.convertToEntity(dto);
+
+		if (result.hasErrors()) {
+			log.error("Erro validando dados da pessoa: {}", person);
+			result.getAllErrors().forEach(error -> response.getErrors().add(error.getDefaultMessage()));
+			return ResponseEntity.badRequest().body(response);
+		}
+
+		newPerson.setId(person.get().getId());
+		this.personService.persist(newPerson);
+
+		response.setData(this.convertToDto(newPerson));
 		return ResponseEntity.ok(response);
+
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Response<PersonDto>> delete(@PathVariable Long id, @Valid @RequestBody PersonDto dto,
 			BindingResult result) {
+
+		log.info("Removendo pessoa com id {}", id);
+
 		Response<PersonDto> response = new Response<>();
+		Optional<Person> person = this.personService.getPersonById(id);
+
+		if (!person.isPresent()) {
+			log.error("Erro ao remover pessoa com id {}", id);
+			response.getErrors().add("Pessoa com o id " + id + " não encontrada");
+			return ResponseEntity.badRequest().body(response);
+		}
+
+		this.personService.remove(person.get());
+
 		return ResponseEntity.ok(response);
 	}
 
