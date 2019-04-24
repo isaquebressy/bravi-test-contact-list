@@ -109,7 +109,7 @@ public class PersonController {
 		Optional<Person> person = this.personService.getPersonById(id);
 
 		if (!person.isPresent()) {
-			response.getErrors().add("Pessoa com o id " + id + " não encontrada");
+			result.addError(new ObjectError("pessoa","Pessoa com o id " + id + " não encontrada"));
 		}
 
 		Person newPerson = this.convertToEntity(dto);
@@ -155,6 +155,7 @@ public class PersonController {
 
 	private PersonDto convertToDto(Person person) {
 		PersonDto dto = new PersonDto();
+		dto.setId(Optional.ofNullable(person.getId()));
 		dto.setName(person.getName());
 
 		return dto;
