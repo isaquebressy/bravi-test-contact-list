@@ -43,7 +43,8 @@ public class PersonController {
 	private int pageSize;
 
 	@GetMapping
-	public ResponseEntity<Response<Page<PersonDto>>> getAllPeople(@RequestParam(value = "page", defaultValue = "0") int page) {
+	public ResponseEntity<Response<Page<PersonDto>>> getAllPeople(
+			@RequestParam(value = "page", defaultValue = "0") int page) {
 
 		log.info("Buscando todas as pessoas");
 
@@ -93,7 +94,7 @@ public class PersonController {
 			return ResponseEntity.badRequest().body(response);
 		}
 
-		this.personService.persist(person);
+		person = this.personService.persist(person);
 		response.setData(this.convertToDto(person));
 
 		return ResponseEntity.ok(response);
@@ -109,7 +110,7 @@ public class PersonController {
 		Optional<Person> person = this.personService.getPersonById(id);
 
 		if (!person.isPresent()) {
-			result.addError(new ObjectError("pessoa","Pessoa com o id " + id + " não encontrada"));
+			result.addError(new ObjectError("pessoa", "Pessoa com o id " + id + " não encontrada"));
 		}
 
 		Person newPerson = this.convertToEntity(dto);
@@ -128,8 +129,7 @@ public class PersonController {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Response<PersonDto>> delete(@PathVariable Long id, @Valid @RequestBody PersonDto dto,
-			BindingResult result) {
+	public ResponseEntity<Response<PersonDto>> delete(@PathVariable Long id, BindingResult result) {
 
 		log.info("Removendo pessoa com id {}", id);
 

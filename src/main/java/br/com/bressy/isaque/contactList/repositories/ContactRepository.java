@@ -20,5 +20,5 @@ public interface ContactRepository extends JpaRepository<Contact, Long> {
 	Page<Contact> findByPersonId(@Param("personId") Long personId, Pageable pageable);
 
 	Contact findByTypeAndDetail(TypeEnum type, String detail);
-
+	
 }

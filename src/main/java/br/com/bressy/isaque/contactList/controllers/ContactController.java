@@ -22,11 +22,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.bressy.isaque.contactList.dtos.ContactDto;
 import br.com.bressy.isaque.contactList.entities.Contact;
 import br.com.bressy.isaque.contactList.entities.Person;
+import br.com.bressy.isaque.contactList.enums.TypeEnum;
 import br.com.bressy.isaque.contactList.response.Response;
 import br.com.bressy.isaque.contactList.services.ContactService;
 import br.com.bressy.isaque.contactList.services.PersonService;
@@ -92,7 +94,7 @@ public class ContactController {
 	@PostMapping("/person/{id}")
 	public ResponseEntity<Response<ContactDto>> create(@PathVariable Long id, @Valid @RequestBody ContactDto dto,
 			BindingResult result) {
-		
+
 		log.info("Cadastrando contato: {}", dto);
 
 		Response<ContactDto> response = new Response<>();
@@ -114,7 +116,7 @@ public class ContactController {
 
 		contact.setPerson(person.get());
 
-		this.contactService.persist(contact);
+		contact = this.contactService.persist(contact);
 		response.setData(this.convertToDto(contact));
 
 		return ResponseEntity.ok(response);
@@ -149,8 +151,7 @@ public class ContactController {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Response<ContactDto>> delete(@PathVariable Long id, @Valid @RequestBody ContactDto dto,
-			BindingResult result) {
+	public ResponseEntity<Response<ContactDto>> delete(@PathVariable Long id, @RequestPart ContactDto contactDto, BindingResult result) {
 
 		log.info("Removendo contato com id {}", id);
 
@@ -169,14 +170,15 @@ public class ContactController {
 	}
 
 	private void validateData(ContactDto dto, BindingResult result) {
-		this.contactService.findByTypeAndDetail(dto.getType(), dto.getDetail())
-		.ifPresent(contact -> result.addError(new ObjectError("contact", "Contato já existente")));	
+		this.contactService.findByTypeAndDetail(TypeEnum.valueOf(dto.getType()), dto.getDetail())
+				.ifPresent(contact -> result.addError(new ObjectError("contact", "Contato já existente")));
 	}
 
 	private ContactDto convertToDto(Contact contact) {
 		ContactDto dto = new ContactDto();
+		dto.setId(contact.getId());
 		dto.setDetail(contact.getDetail());
-		dto.setType(contact.getType());
+		dto.setType(contact.getType().toString());
 
 		return dto;
 	}
@@ -184,7 +186,7 @@ public class ContactController {
 	private Contact convertToEntity(ContactDto dto) {
 		Contact contact = new Contact();
 		contact.setDetail(dto.getDetail());
-		contact.setType(dto.getType());
+		contact.setType(TypeEnum.valueOf(dto.getType()));
 
 		return contact;
 	}
