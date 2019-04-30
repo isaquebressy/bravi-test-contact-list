@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.bressy.isaque.contactList.dtos.ContactDto;
@@ -103,7 +102,7 @@ public class ContactController {
 		Optional<Person> person = this.personService.getPersonById(id);
 
 		if (!person.isPresent()) {
-			response.getErrors().add("Pessoa com o id " + id + " não encontrada");
+			result.addError(new ObjectError("person", "Pessoa com o id " + id + " não encontrada"));
 		}
 
 		Contact contact = this.convertToEntity(dto);
@@ -132,18 +131,23 @@ public class ContactController {
 		Optional<Contact> contact = this.contactService.getContactById(id);
 
 		if (!contact.isPresent()) {
-			response.getErrors().add("Contato com o id " + id + " não encontrada");
+			result.addError(new ObjectError("contact", "Contato com o id " + id + " não encontrada"));
 		}
 
 		Contact newContact = this.convertToEntity(dto);
-
+		
 		if (result.hasErrors()) {
-			log.error("Erro validando dados da contato: {}", contact);
+			log.error("Erro validando dados do contato de id {}", id);
 			result.getAllErrors().forEach(error -> response.getErrors().add(error.getDefaultMessage()));
 			return ResponseEntity.badRequest().body(response);
 		}
 
 		newContact.setId(contact.get().getId());
+		
+		Long personId = contact.get().getPerson().getId();
+		Person person = this.personService.getPersonById(personId).get();
+		newContact.setPerson(person);
+		
 		this.contactService.persist(newContact);
 
 		response.setData(this.convertToDto(newContact));
@@ -151,7 +155,7 @@ public class ContactController {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Response<ContactDto>> delete(@PathVariable Long id, @RequestPart ContactDto contactDto, BindingResult result) {
+	public ResponseEntity<Response<ContactDto>> delete(@PathVariable Long id) {
 
 		log.info("Removendo contato com id {}", id);
 
@@ -176,14 +180,14 @@ public class ContactController {
 
 	private ContactDto convertToDto(Contact contact) {
 		ContactDto dto = new ContactDto();
-		dto.setId(contact.getId());
+		dto.setId(Optional.ofNullable(contact.getId()));
 		dto.setDetail(contact.getDetail());
 		dto.setType(contact.getType().toString());
 
 		return dto;
 	}
 
-	private Contact convertToEntity(ContactDto dto) {
+	private Contact convertToEntity(ContactDto dto) {		
 		Contact contact = new Contact();
 		contact.setDetail(dto.getDetail());
 		contact.setType(TypeEnum.valueOf(dto.getType()));

@@ -129,7 +129,7 @@ public class PersonController {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Response<PersonDto>> delete(@PathVariable Long id, BindingResult result) {
+	public ResponseEntity<Response<PersonDto>> delete(@PathVariable Long id) {
 
 		log.info("Removendo pessoa com id {}", id);
 

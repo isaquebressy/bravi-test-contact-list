@@ -1,7 +1,9 @@
 package br.com.bressy.isaque.contactList.dtos;
 
+import java.util.Optional;
+
 public class ContactDto {
-	private Long id;
+	private Optional<Long> id;
 	private String detail;
 	private String type;
 
@@ -24,11 +26,11 @@ public class ContactDto {
 		this.type = type;
 	}
 
-	public Long getId() {
+	public Optional<Long> getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(Optional<Long> id) {
 		this.id = id;
 	}
 
